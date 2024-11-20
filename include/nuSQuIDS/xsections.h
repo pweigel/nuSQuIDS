@@ -573,10 +573,28 @@ private:
 ///codes explictly.
 enum PDGCode : int32_t{
     electron=11,
+    nu_e=12,
+    muon=13,
+    nu_mu=14,
+    tau=15,
+    nu_tau=16,
     ///A pseduoparticle with the average properties of a proton and neutron
     isoscalar_nucleon=81,
     proton=2212,
     neutron=2112,
+    // Most nuclear targets go as 100ZZZAAA0, assuming ground state and no s quarks
+    deuteron=1000010020,
+    carbon=1000060120,
+    oxygen=1000080160,
+    sodium=1000110230,
+    magnesium=1000120240,
+    aluminum=1000130270,
+    silicon=1000140280,
+    sulfur=1000160320,
+    calcium=100020400,
+    iron=1000260560,
+    nickel=1000280580,
+    lead=1000822080,
 };
   
 namespace detail{
@@ -603,12 +621,13 @@ public:
     CrossSectionLibrary(){}
     CrossSectionLibrary(const MapType& crosssections):data(crosssections){}
     ///\return the requested cross section, or a null pointer if it is not found
-	std::shared_ptr<const NeutrinoCrossSections> crossSectionForTarget(PDGCode target) const;
-	bool hasTarget(PDGCode target) const;
+    std::shared_ptr<const NeutrinoCrossSections> crossSectionForTarget(PDGCode target) const;
+    bool hasTarget(PDGCode target) const;
+    
     template <typename CrossSection>
     void addTarget(PDGCode target, CrossSection&& xs){
         if(hasTarget(target))
-			throw std::runtime_error("Attempt to redefine existing target "+std::to_string(target));
+      throw std::runtime_error("Attempt to redefine existing target "+std::to_string(target));
         data.emplace(target, std::make_shared<CrossSection>(std::move(xs)));
     }
     void addTarget(PDGCode target, std::shared_ptr<NeutrinoCrossSections> xs){
@@ -616,6 +635,9 @@ public:
             throw std::runtime_error("Attempt to redefine existing target "+std::to_string(target));
         data.emplace(target, xs);
     }
+
+    int numberOfTargets();
+    std::vector<PDGCode> targets();
 private:
     MapType data;
 };
